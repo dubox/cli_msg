@@ -10,6 +10,8 @@ var server = net.createServer(function(socket){
     console.log('connect: ' +
         socket.remoteAddress + ':' + socket.remotePort);
     socket.setEncoding('utf8');
+	
+	socket.Key = socket.remoteAddress+socket.remotePort;	//一台机器可以开对个客户端 去掉socket.remotePort则只能开一个
 
     //超时事件
     socket.setTimeout(timeout,function(){
@@ -25,14 +27,18 @@ var server = net.createServer(function(socket){
 		//data = data.trim();
         console.log('re:' + data);
 		
-		if(!socketList[socket.remoteAddress]){
+		if(!socketList[socket.Key]){
 			add(socket);
 		}
 		/**/
 		//处理接收到的数据
-		if((typeof socketList[socket.remoteAddress]['name']) == 'undefined'){
+		
+		data = data.trim();
+		if(data.substring(0,1) == '#'){
+			
+			data = data.substring(1);
 			//注册客户端昵称
-			socketList[socket.remoteAddress]['name'] = data;
+			socketList[socket.Key]['name'] = data;
 			socket.write('server: hello,'+data);
 		}else{
 			//发送消息
@@ -73,7 +79,7 @@ server.on('connection', function (socket) {
         socket.setTimeout(0);
         socket.setNoDelay(true);
         socket.setKeepAlive(true, 0);
-		socket.write('server: hello,'+socket.remoteAddress+'\r\n');//服务器问候语 连接时发送一次
+		socket.write('server: hello,'+socket.Key+'\r\n'+'设置昵称：#nicheng');//服务器问候语 连接时发送一次
 		
         //放入连接池
         add(socket, function () {
@@ -88,9 +94,9 @@ server.on('connection', function (socket) {
 
 //将连接加入连接池
 function add(socket, fun) {
-    if (!socketList[socket.remoteAddress]) {
-		socketList[socket.remoteAddress] = [];
-        socketList[socket.remoteAddress]['socket'] = socket;
+    if (!socketList[socket.Key]) {
+		socketList[socket.Key] = [];
+        socketList[socket.Key]['socket'] = socket;
         (fun || function () { })();
     }
 }
@@ -109,13 +115,15 @@ function send(data,socket) {
 	var msgarr = data.split(':',2);
 	if(msgarr.length < 2){	//群发消息
 		for (var i in socketList) {
-			if(i != socket.remoteAddress)	//排除信息发出者
-			socketList[i]['socket'].write('['+socketList[socket.remoteAddress]['name']+']: '+msgarr[0]);
+			if(i != socket.Key){	//排除信息发出者
+			socketList[i]['socket'].write('['+socketList[socket.Key]['name']+']: '+msgarr[0]);
+			console.log('ww'+i);
+			}
 		}
 	}else{
 		for (var i in socketList) {
 			if(socketList[i]['name'] == msgarr[0]){//对指定目标发送消息
-				socketList[i]['socket'].write('['+socketList[socket.remoteAddress]['name']+']: '+msgarr[1]);
+				socketList[i]['socket'].write('['+socketList[socket.Key]['name']+']: '+msgarr[1]);
 				return false;
 			}
 		}
