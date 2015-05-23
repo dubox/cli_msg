@@ -11,7 +11,7 @@ var server = net.createServer(function(socket){
         socket.remoteAddress + ':' + socket.remotePort);
     socket.setEncoding('utf8');
 	
-	socket.Key = socket.remoteAddress+socket.remotePort;	//一台机器可以开对个客户端 去掉socket.remotePort则只能开一个
+	socket.Key = socket.remoteAddress+socket.remotePort;	//一台机器可以开多个客户端 去掉socket.remotePort则只能开一个
 
     //超时事件
     socket.setTimeout(timeout,function(){
@@ -75,7 +75,7 @@ server.on("error",function(exception){
 }); 
 
 //连接
-server.on('connection', function (socket) {
+server.on('connection', function (socket) {console.log('cccccccccccccccccccccccccccccc');
         socket.setTimeout(0);
         socket.setNoDelay(true);
         socket.setKeepAlive(true, 0);
@@ -86,7 +86,7 @@ server.on('connection', function (socket) {
             //触发绑定事件
             //events.emit('connect', socket.remoteAddress);
 			for(var i in socketList){
-				console.log(i);
+				//console.log(i);
 			}
         });
 		
