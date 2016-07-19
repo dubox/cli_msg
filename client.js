@@ -7,16 +7,19 @@ var host = '127.0.0.1';
 var client= new net.Socket();
 client.setEncoding('utf8');
 
+
+var readline = require('readline');
+	var rl = readline.createInterface({
+		  input: process.stdin,
+		  output: process.stdout
+	});
+
 //连接到服务端
 client.connect(port,host,function(){
 	console.log('client ready!');
     
 	
-	var readline = require('readline');
-	var rl = readline.createInterface({
-		  input: process.stdin,
-		  output: process.stdout
-	});
+	
 	
 	//client.write('dubox');	//向服务器注册昵称
 	
@@ -31,7 +34,8 @@ client.connect(port,host,function(){
 });
 
 client.on('data',function(data){
-    console.log(data);
+    console.log(data );
+	rl.prompt();
 	
 });
 client.on('error',function(error){

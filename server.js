@@ -37,10 +37,21 @@ var server = net.createServer(function(socket){
 		if(data.substring(0,1) == '#'){
 			
 			data = data.substring(1);
+			
+			if(!checkName(data)){
+				socket.write('server: 此昵称已被占用！');				
+				return false;
+			}
 			//注册客户端昵称
 			socketList[socket.Key]['name'] = data;
 			socket.write('server: hello,'+data);
 		}else{
+			//发送消息前检查昵称 没有昵称不能发消息
+			if(typeof socketList[socket.Key]['name'] == 'undefined' || socketList[socket.Key]['name']==''){
+				socket.write('server: 请先设置昵称！');
+				return false;
+			}
+				
 			//发送消息
 			send(data,socket);
 		}
@@ -75,11 +86,11 @@ server.on("error",function(exception){
 }); 
 
 //连接
-server.on('connection', function (socket) {console.log('cccccccccccccccccccccccccccccc');
+server.on('connection', function (socket) {
         socket.setTimeout(0);
         socket.setNoDelay(true);
         socket.setKeepAlive(true, 0);
-		socket.write('server: hello,'+socket.Key+'\r\n'+'设置昵称：#nicheng');//服务器问候语 连接时发送一次
+		socket.write('server: hello,'+socket.Key+'\r\n'+'设置昵称：<#nicheng>'+'\r\n'+'相指定用户发送消息：<nicheng:words>');//服务器问候语 连接时发送一次
 		
         //放入连接池
         add(socket, function () {
@@ -132,3 +143,18 @@ function send(data,socket) {
 
     
 }
+
+//检查用户昵称
+function checkName(name){
+
+	for (var i in socketList) {
+			if(socketList[i]['name'] == name){//检查重复
+				
+				return false;
+			}
+		}
+
+	return true;
+}
+
+
