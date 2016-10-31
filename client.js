@@ -1,8 +1,9 @@
 
 
+var process = require('process');
 var net = require('net');
 var port = 3000;
-var host = '127.0.0.1';
+var host = '192.168.199.133';
 
 var client= new net.Socket();
 client.setEncoding('utf8');
@@ -34,6 +35,7 @@ client.connect(port,host,function(){
 });
 
 client.on('data',function(data){
+	process.title = data;
     console.log(data );
 	rl.prompt();
 	
